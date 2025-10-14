@@ -1,0 +1,273 @@
+/* 全局样式和主题设置 */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #4096ff;
+  --success-color: #67c23a;
+  --warning-color: #e6a23c;
+  --danger-color: #f56c6c;
+  --info-color: #909399;
+  --text-color-primary: #303133;
+  --text-color-regular: #606266;
+  --text-color-secondary: #909399;
+  --text-color-placeholder: #c0c4cc;
+  --border-color-base: #dcdfe6;
+  --border-color-light: #e4e7ed;
+  --border-color-lighter: #ebeef5;
+  --border-color-extra-light: #f2f6fc;
+  --background-color-base: #ffffff;
+  --background-color-light: #f5f7fa;
+  --background-color-lighter: #fafafa;
+}
+
+/* 深色主题变量 */
+.dark {
+  --text-color-primary: #ffffff;
+  --text-color-regular: #c0c4cc;
+  --text-color-secondary: #909399;
+  --text-color-placeholder: #606266;
+  --border-color-base: #4e5969;
+  --border-color-light: #434c5e;
+  --border-color-lighter: #374151;
+  --border-color-extra-light: #1f2937;
+  --background-color-base: #1e1e2e;
+  --background-color-light: #1e1e2e;
+  --background-color-lighter: #1e1e2e;
+  --el-bg-color: #1e1e2e;
+  --el-bg-color-page: #1e1e2e;
+  --el-text-color-primary: #ffffff;
+  --el-text-color-regular: #c0c4cc;
+  --el-border-color: #4e5969;
+  --el-input-bg-color: #1e1e2e;
+  --el-input-text-color: #ffffff;
+  --el-input-placeholder-color: #606266;
+  --el-card-bg-color: #2d3748;
+  --el-scrollbar-track-color: #1e1e2e;
+  --el-scrollbar-thumb-color: #4e5969;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-color-primary);
+  background-color: var(--background-color-base);
+  transition: all 0.3s ease;
+}
+
+#app {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 背景效果 */
+.background-system {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.floating-elements {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.floating-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.2;
+  animation: float 30s infinite ease-in-out;
+}
+
+.floating-orb-1 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.floating-orb-2 {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  top: 30%;
+  right: 10%;
+  animation-delay: 5s;
+}
+
+.floating-orb-3 {
+  width: 350px;
+  height: 350px;
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  bottom: 10%;
+  left: 20%;
+  animation-delay: 10s;
+}
+
+.floating-orb-4 {
+  width: 250px;
+  height: 250px;
+  background: linear-gradient(135deg, #f43f5e, #8b5cf6);
+  bottom: 20%;
+  right: 20%;
+  animation-delay: 15s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(20px, 20px) rotate(5deg);
+  }
+  50% {
+    transform: translate(0, 40px) rotate(0deg);
+  }
+  75% {
+    transform: translate(-20px, 20px) rotate(-5deg);
+  }
+}
+
+/* 几何装饰 */
+.geometric-decorations {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.geometric-line {
+  position: absolute;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+  height: 1px;
+  opacity: 0.5;
+}
+
+.geometric-line-1 {
+  top: 30%;
+  left: 0;
+  right: 0;
+}
+
+.geometric-line-2 {
+  top: 50%;
+  left: 0;
+  right: 0;
+}
+
+.geometric-line-3 {
+  top: 70%;
+  left: 0;
+  right: 0;
+}
+
+/* 粒子系统 */
+.particle-system {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.particle {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  animation: particleFloat 15s infinite ease-in-out;
+}
+
+@keyframes particleFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.1;
+  }
+  50% {
+    transform: translate(50px, 50px) scale(1.2);
+    opacity: 0.3;
+  }
+}
+
+/* 网格叠加 */
+.grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+  opacity: 0.3;
+}
+
+/* 渐变文字 */
+.text-gradient {
+  background: linear-gradient(to right, var(--primary-color), #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--border-color-lighter);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color-base);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-color-secondary);
+}
+
+/* 动画过渡 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+  transition: transform 0.3s ease;
+}
+
+.slide-enter-from {
+  transform: translateX(-20px);
+  opacity: 0;
+}
+
+.slide-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
