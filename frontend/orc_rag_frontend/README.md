@@ -21,20 +21,25 @@
 ```
 orc_rag_frontend/
 ├── src/                    # 源代码目录
-│   ├── components/         # Vue组件
-│   │   ├── chat/           # 聊天相关组件
-│   │   ├── pdf/            # PDF查看相关组件
-│   │   └── layout/         # 布局组件
 │   ├── views/              # 页面视图
+│   │   └── AboutView.vue   # 主视图组件（包含所有功能）
 │   ├── services/           # API服务和业务逻辑
+│   │   └── api.js          # API调用封装
 │   ├── store/              # Pinia状态管理
+│   │   └── index.js        # 全局状态管理
 │   ├── router/             # 路由配置
+│   │   └── index.js        # 路由定义
 │   ├── styles/             # 全局样式
-│   ├── assets/             # 静态资源
+│   │   └── globals.css     # 全局CSS样式
 │   ├── main.js             # 应用入口
-│   └── App.vue             # 根组件
+│   ├── App.vue             # 根组件
+│   └── style.css           # 默认样式
 ├── public/                 # 静态文件目录
+├── .gitignore              # Git忽略文件
+├── .vscode/                # VSCode配置
+├── index.html              # HTML模板
 ├── package.json            # npm依赖配置
+├── package-lock.json       # npm依赖锁定文件
 ├── vite.config.js          # Vite配置
 └── README.md               # 项目说明文档
 ```
