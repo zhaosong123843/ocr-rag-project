@@ -10,7 +10,10 @@ langchain-unstructured
 paddleocr
 paddlenlp
 dotenv
-faiss-cpu
+chromadb
+rank_bm25
+torch
+transformers
 langgraph
 langchain
 langchain-openai

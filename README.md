@@ -9,7 +9,7 @@
 ### 文档处理功能
 - 📄 **PDF上传与解析**：支持上传PDF文件并提取文本、图片和表格内容
 - 🔍 **OCR文本识别**：使用PaddleOCR技术识别文档中的文字内容
-- 🗂️ **多模态向量索引**：利用FAISS构建高效的向量检索系统
+- 🗂️ **多模态向量索引**：利用Chroma构建高效的向量检索系统
 - 📊 **结构化解析**：识别文档结构，包括标题、文本、图像和表格等元素
 - 📝 **Markdown输出**：将解析后的内容转换为Markdown格式
 
@@ -24,6 +24,7 @@
 - 🚀 **高性能**：使用异步编程和流式传输提升用户体验
 - 🔄 **模块化设计**：服务层模块化，便于扩展和维护
 - 🎨 **现代化UI**：采用Element Plus组件库，提供美观直观的界面
+- 📊 **完善的日志系统**：支持多级日志记录、异常追踪和文件轮转，便于问题排查和系统监控
 
 ## 技术栈
 
@@ -32,10 +33,11 @@
 - **Web服务器**：Uvicorn
 - **文档解析**：PyMuPDF、Unstructured
 - **OCR技术**：PaddleOCR
-- **向量存储**：FAISS
+- **向量存储**：Chroma
 - **LLM集成**：LangChain、DeepSeek、Ollama
 - **数据库**：SQLAlchemy、SQLite
 - **异步编程**：Asyncio
+- **日志系统**：自定义日志服务，支持多级别日志记录和文件轮转
 
 ### 前端技术栈
 - **框架**：Vue 3
@@ -50,28 +52,42 @@
 
 ```
 ocr_rag_preject/
+├── README.md              # 项目说明文档
+├── .gitignore             # Git忽略文件配置
 ├── backend/               # 后端代码
+│   ├── README.md          # 后端服务说明
 │   ├── app.py             # FastAPI主应用
 │   ├── run.py             # 服务器启动脚本
 │   ├── requirements.txt   # Python依赖
+│   ├── openapi.yaml       # OpenAPI规范文件
+│   ├── models/            # 模型目录
+│   │   └── bge-reranker-v2-m3/ # Reranker模型
 │   ├── services/          # 核心服务模块
 │   │   ├── pdf_service.py     # PDF处理服务
 │   │   ├── index_service.py   # 向量索引服务
 │   │   ├── rag_service.py     # RAG问答服务
-│   │   └── database_service.py # 数据库服务
-│   └── data/              # 数据存储目录
-├── frontend/              # 前端代码
-│   └── orc_rag_frontend/  # Vue前端项目
-│       ├── src/           # 前端源代码
-│       │   ├── components/   # Vue组件
-│       │   ├── views/        # 页面视图
-│       │   ├── services/     # API服务
-│       │   ├── store/        # Pinia状态管理
-│       │   ├── router/       # 路由配置
-│       │   └── main.js       # 应用入口
-│       ├── package.json   # npm依赖配置
-│       └── vite.config.js # Vite配置
-└── .gitignore             # Git忽略文件配置
+│   │   ├── database_service.py # 数据库服务
+│   │   ├── log_service.py     # 日志服务
+│   │   ├── ultis.py           # 工具函数
+│   │   └── create_database.py # 数据库创建脚本
+│   └── data/              # 数据存储目录（自动创建）
+└── frontend/              # 前端代码
+    └── orc_rag_frontend/  # Vue前端项目
+        ├── README.md      # 前端说明文档
+        ├── .gitignore     # Git忽略文件配置
+        ├── .vscode/       # VSCode配置
+        ├── index.html     # HTML入口
+        ├── package.json   # npm依赖配置
+        ├── package-lock.json # 依赖版本锁定
+        ├── vite.config.js # Vite配置
+        ├── public/        # 静态资源目录
+        └── src/           # 前端源代码
+            ├── components/   # Vue组件
+            ├── views/        # 页面视图
+            ├── services/     # API服务
+            ├── store/        # Pinia状态管理
+            ├── router/       # 路由配置
+            └── main.js       # 应用入口
 ```
 
 ## 快速开始

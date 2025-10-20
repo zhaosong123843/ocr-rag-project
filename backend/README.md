@@ -12,26 +12,32 @@
 - **Web服务器**：Uvicorn
 - **文档解析**：PyMuPDF (fitz)、Unstructured
 - **OCR技术**：PaddleOCR
-- **向量存储**：FAISS
+- **向量存储**：Chroma
 - **LLM集成**：LangChain、DeepSeek、Ollama
 - **数据库**：SQLAlchemy、SQLite
 - **异步编程**：Asyncio
 - **图像处理**：Pillow、Matplotlib
+- **日志系统**：自定义日志服务，支持多级别日志记录、异常追踪和文件轮转
 
 ## 目录结构
 
 ```
 backend/
+├── README.md               # 后端服务说明
 ├── app.py                  # FastAPI主应用入口
 ├── run.py                  # 服务器启动脚本
 ├── requirements.txt        # Python依赖列表
-├── database.py             # 数据库模型定义
 ├── openapi.yaml            # OpenAPI规范文件
+├── models/                 # 模型目录
+│   └── bge-reranker-v2-m3/ # Reranker模型（bge-reranker）
 ├── services/               # 核心服务模块
 │   ├── pdf_service.py      # PDF处理服务
 │   ├── index_service.py    # 向量索引服务
 │   ├── rag_service.py      # RAG问答服务
-│   └── database_service.py # 数据库服务
+│   ├── database_service.py # 数据库服务
+│   ├── log_service.py      # 日志服务
+│   ├── ultis.py            # 工具函数
+│   └── create_database.py  # 数据库创建脚本
 └── data/                   # 数据存储目录（自动创建）
 ```
 
@@ -46,8 +52,8 @@ backend/
 
 ### 索引服务 (`index_service.py`)
 - **向量嵌入**：使用Ollama的bge-m3模型生成文本嵌入（需要访问本地ollama部署的embedding模型）
-- **FAISS索引**：构建和管理高效的向量索引
-- **相似度搜索**：执行向量相似度搜索，找出相关文档片段
+- **Chroma索引**：构建和管理高效的向量索引
+- **混合搜索**：执行混合搜索，结合向量相似度和BM25关键词检索，并使用reranker模型进行重排序，找出相关文档片段
 
 ### RAG服务 (`rag_service.py`)
 - **会话管理**：管理用户会话和聊天历史
@@ -60,6 +66,13 @@ backend/
 - **文件管理**：存储和管理上传的文件信息
 - **状态跟踪**：跟踪文件解析和索引状态
 - **数据持久化**：使用SQLite进行数据持久化
+
+### 日志服务 (`log_service.py`)
+- **日志记录**：支持DEBUG、INFO、WARNING、ERROR、CRITICAL多级别日志
+- **异常追踪**：自动记录异常堆栈信息
+- **文件轮转**：支持基于大小的日志文件轮转，防止日志文件过大
+- **控制台输出**：同时支持控制台和文件日志输出
+- **上下文信息**：记录时间戳、日志级别、文件名、行号等详细信息
 
 ## 快速开始
 

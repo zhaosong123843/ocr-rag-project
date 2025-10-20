@@ -7,35 +7,26 @@ from typing_extensions import TypedDict
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
-from langchain.chat_models import init_chat_model
 from langchain_deepseek import ChatDeepSeek
-from langchain_openai import OpenAIEmbeddings
-from langchain_ollama.embeddings import OllamaEmbeddings
-from langchain_community.vectorstores import FAISS
-from collections import defaultdict
+from .log_service import get_logger, info, warning, error, log_exception
 
-# 存储结构：sessions[session_id] = [{"role":"user|assistant","content":"..."}...]
+from collections import defaultdict
 _sessions: dict[str, list[dict]] = defaultdict(list)
+logger = get_logger('rag_service')
 
 def get_history(session_id: str) -> list[dict]:
     return _sessions.get(session_id, [])
 
 def append_history(session_id: str, role: str, content: str) -> None:
+    """添加历史记录"""
+    logger.info(f"添加历史记录: {session_id} - {role} - {content}")
     _sessions[session_id].append({"role": role, "content": content})
 
 def clear_history(session_id: str) -> None:
+    """清除历史记录"""
+    logger.info(f"清除历史记录: {session_id}")
     _sessions.pop(session_id, None)
 
-# ---------------- 配置 ----------------
-MODEL_NAME = "deepseek-chat"
-MODEL_PROVIDER = "deepseek"
-TEMPERATURE = 0
-
-EMBED_MODEL = "text-embedding-3-large"
-K = 3
-# FAISS L2：越小越相似；数值可以灵活调整
-SCORE_TAU_TOP1 = 0.5
-SCORE_TAU_MEAN3 = 0.60
 
 SYSTEM_INSTRUCTION = (
     "你是多模态 PDF 检索 RAG 聊天机器人，可以围绕多模态文档进行解析、检索和问答。\n"
@@ -62,108 +53,19 @@ ANSWER_NO_CONTEXT = (
     "问题：\n{question}"
 )
 
-
-# ---------------- 模型/向量函数 ----------------
-def _get_llm():
-    # return init_chat_model(model=MODEL_NAME, model_provider=MODEL_PROVIDER, temperature=TEMPERATURE)
-    return ChatDeepSeek(
-        # api_key=os.getenv("DEEPSEEK_API_KEY"),
-        model=MODEL_NAME,
-        temperature=TEMPERATURE,
-    )
-
-def _get_grader():
-    # return init_chat_model(model=MODEL_NAME, model_provider=MODEL_PROVIDER, temperature=0)
-    return ChatDeepSeek(
-        # api_key=os.getenv("DEEPSEEK_API_KEY"),
-        model=MODEL_NAME,
-        temperature=0,
-    )
-
-# def _get_embeddings():
-#     return OpenAIEmbeddings(
-#         api_key=os.getenv("OPENAI_API_KEY"),
-#         base_url=os.getenv("OPENAI_BASE_URL"),
-#         model=EMBED_MODEL,
-#     )
-
-def _get_embeddings() -> OllamaEmbeddings:
-
-    return OllamaEmbeddings(model="bge-m3:latest",base_url="http://127.0.0.1:11434")
-
-def _vs_dir(file_id: str) -> str:
-    # 获取向量库文件
-    return os.path.join("data", file_id, "index_faiss")
-
-def _load_vs(file_id: str) -> FAISS:
-    # 加载向量数据库
-    vs_path = _vs_dir(file_id)
-    idx_file = os.path.join(vs_path, "index.faiss")
-
-    if not os.path.exists(idx_file):
-        raise FileNotFoundError(f"FAISS index not found at {vs_path}; build index first.")
-    return FAISS.load_local(vs_path, _get_embeddings(), allow_dangerous_deserialization=True)
-
-def _score_ok(scores: List[float]) -> bool:
-    if not scores:
-        return False
-    top1 = scores[0]
-    mean3 = sum(scores[:3]) / min(3, len(scores))
-    return (top1 <= SCORE_TAU_TOP1) or (mean3 <= SCORE_TAU_MEAN3)
-
-# ---------------- 主流程：检索 + 判定 + 生成 ----------------
-async def retrieve(question: str, file_id: str) -> tuple[list[dict], str]:
-    """
-    返回 (citations, context_text)
-    citations: [{citation_id, fileId, rank, page, snippet, score, previewUrl}]
-    context_text: 供 LLM 使用的拼接上下文
-    """
-    # 加载本地FAISS数据库
-    vs = _load_vs(file_id)
-
-    # 相似度检索
-    hits = vs.similarity_search_with_score(question, k=K)
-    citations = []
-    ctx_snippets = []
-    scores = []
-
-    for i, (doc, score) in enumerate(hits, start=1):
-        snippet_short = (doc.page_content or "").strip()
-        # 截断过长的文本片段（500字符限制）
-        if len(snippet_short) > 500:
-            snippet_short = snippet_short[:500] + "..."
-
-        page = doc.metadata.get("page") or doc.metadata.get("page_number")
-        # 检索到的文档片段信息
-        citations.append({
-            "citation_id": f"{file_id}-c{i}",
-            "fileId": file_id,
-            "rank": i,
-            "page": page,
-            "snippet": (doc.page_content or "")[:4000],
-            "score": float(score),
-            "previewUrl": f"/api/v1/pdf/page?fileId={file_id}&page={(page or 1)}&type=original",
-        })
-
-        # 构建上下文
-        ctx_snippets.append(f"[{i}] {snippet_short}")
-        scores.append(float(score))
-    context_text = "\n\n".join(ctx_snippets) if ctx_snippets else "(no hits)"
-
-    # 规则 + LLM 复核
-    ok_by_score = _score_ok(scores)
-
-    if not ok_by_score:
-        # 使用大模型对用户和检索的内容进行相关性校验
-        grader = _get_grader()
-        grade_prompt = GRADE_PROMPT.format(context=context_text, question=question)
-        decision = await grader.ainvoke([{"role": "user", "content": grade_prompt}])
-        ok_by_llm = "yes" in (decision.content or "").lower()
-    else:
-        ok_by_llm = True
-
-    branch = "with_context" if ok_by_llm else "no_context"
-    return citations, context_text if branch == "with_context" else ""
+async def _get_llm():
+    
+    try:
+        # return init_chat_model(model=MODEL_NAME, model_provider=MODEL_PROVIDER, temperature=TEMPERATURE)
+        return ChatDeepSeek(
+            # api_key=os.getenv("DEEPSEEK_API_KEY"),
+            model=os.getenv("CHAT_MODEL_NAME", "deepseek-chat"),
+            temperature=0,
+        )
+    except Exception as e:
+        logger.error(f"初始化语言模型失败，错误: {e}")
+        # 抛出异常以便上层处理
+        raise
 
 async def answer_stream(
     question: str,
@@ -184,8 +86,8 @@ async def answer_stream(
         for c in citations:
             yield {"type": "citation", "data": c}
 
-    # 组装“历史 + 本轮提示”
-    llm = _get_llm()
+    # 组装"历史 + 本轮提示"
+    llm = await _get_llm()
     # 获取历史对话消息
     history_msgs = get_history(session_id) if session_id else []
     # 将检索到的内容添加到对话消息中，作为提示词
@@ -211,7 +113,9 @@ async def answer_stream(
             if delta:
                 final_text_parts.append(delta)
                 yield {"type": "token", "data": delta}
-    except Exception:
+    except Exception as e:
+        logger.error(f"回答生成过程中出错，session_id: {session_id}, 错误: {e}")
+        
         # 回退：非流式整段生成
         resp = await llm.ainvoke(msgs)
         text = resp.content or ""
@@ -223,7 +127,7 @@ async def answer_stream(
     if branch == "with_context" and citations:
         imgs = []
         # 取前 2 张，避免过多（可按需改成 3）
-        for c in citations[:2]:
+        for c in citations[:1]:
             url = c.get("previewUrl")
             if url:
                 # 生成 Markdown 图片行
